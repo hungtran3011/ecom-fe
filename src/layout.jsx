@@ -5,7 +5,7 @@ import useWindowWidth from './hooks/useWindowWidth';
 import './index.css';
 import ProductsMenu from './components/ProductsMenu';
 
-const LOGO = "/src/assets/images/logo.jpg";
+const LOGO = "//images/logo.jpg";
 
 
 export default function Layout() {

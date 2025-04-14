@@ -7,7 +7,7 @@ export default function HomePage() {
     return (
         <div>
             <h1 className="text-[var(--md-sys-color-on-surface)]">Welcome to the Home Page</h1>
-            <Carousel images={['src/assets/images/banner1.webp', 'src/assets/images/banner2.webp', 'src/assets/images/banner3.webp']} />
+            <Carousel images={['/images/banner1.webp', '/images/banner2.webp', '/images/banner3.webp']} />
             <FeaturedProducts products={[{
                 id: '1',
                 name: 'OPPO Find X8',
@@ -15,7 +15,7 @@ export default function HomePage() {
                 salePrice: 20000000,
                 note: 'Best product ever',
                 rating: 4.5,
-                imageUrl: 'src/assets/images/oppo-find-x8.png',
+                imageUrl: '/images/oppo-find-x8.png',
                 options: {
                     colors: [
                         { text: 'Cherry Blossom Pink', value: '#000000' },
@@ -37,7 +37,7 @@ export default function HomePage() {
                 salePrice: 31090000,
                 note: 'Amazing product',
                 rating: 4.0,
-                imageUrl: 'src/assets/images/iphone-16-pro-max.png',
+                imageUrl: '/images/iphone-16-pro-max.png',
                 options: {
                     colors: ['Blue'],
                     sizes: {
@@ -54,7 +54,7 @@ export default function HomePage() {
                 // salePrice: 120,
                 note: 'Great value for money',
                 rating: 4.8,
-                imageUrl: 'src/assets/images/oppo-find-n5.png',
+                imageUrl: '/images/oppo-find-n5.png',
                 options: {
                     colors: ['Green'],
                     sizes: {
@@ -69,25 +69,25 @@ export default function HomePage() {
                 <h2 className="text-xl font-bold text-[var(--md-sys-color-primary)]">Featured Products</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                     <div className="border rounded-lg p-4 shadow hover:shadow-lg">
-                        <img src="src/assets/images/laptop.webp" alt="Laptop" className="w-full h-40 object-cover mb-2" />
+                        <img src="/images/laptop.webp" alt="Laptop" className="w-full h-40 object-cover mb-2" />
                         <h3 className="text-lg font-semibold">High-Performance Laptop</h3>
                         <p className="text-sm text-gray-600">Powerful and portable for all your needs.</p>
                         <button className="mt-2 px-4 py-2 bg-[var(--md-sys-color-primary)] text-white rounded">Buy Now</button>
                     </div>
                     <div className="border rounded-lg p-4 shadow hover:shadow-lg">
-                        <img src="src/assets/images/smartphone.webp" alt="Smartphone" className="w-full h-40 object-cover mb-2" />
+                        <img src="/images/smartphone.webp" alt="Smartphone" className="w-full h-40 object-cover mb-2" />
                         <h3 className="text-lg font-semibold">Latest Smartphone</h3>
                         <p className="text-sm text-gray-600">Stay connected with cutting-edge technology.</p>
                         <button className="mt-2 px-4 py-2 bg-[var(--md-sys-color-primary)] text-white rounded">Buy Now</button>
                     </div>
                     <div className="border rounded-lg p-4 shadow hover:shadow-lg">
-                        <img src="src/assets/images/headphones.webp" alt="Headphones" className="w-full h-40 object-cover mb-2" />
+                        <img src="/images/headphones.webp" alt="Headphones" className="w-full h-40 object-cover mb-2" />
                         <h3 className="text-lg font-semibold">Noise-Cancelling Headphones</h3>
                         <p className="text-sm text-gray-600">Immerse yourself in high-quality sound.</p>
                         <button className="mt-2 px-4 py-2 bg-[var(--md-sys-color-primary)] text-white rounded">Buy Now</button>
                     </div>
                     <div className="border rounded-lg p-4 shadow hover:shadow-lg">
-                        <img src="src/assets/images/smartwatch.webp" alt="Smartwatch" className="w-full h-40 object-cover mb-2" />
+                        <img src="/images/smartwatch.webp" alt="Smartwatch" className="w-full h-40 object-cover mb-2" />
                         <h3 className="text-lg font-semibold">Smartwatch</h3>
                         <p className="text-sm text-gray-600">Track your fitness and stay organized.</p>
                         <button className="mt-2 px-4 py-2 bg-[var(--md-sys-color-primary)] text-white rounded">Buy Now</button>
