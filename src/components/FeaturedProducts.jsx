@@ -14,29 +14,13 @@ const FeaturedProducts = props => {
 }
 
 FeaturedProducts.defaultProps = {
-  onClick: () => {},
+  onClick: () => { },
 }
 FeaturedProducts.displayName = 'FeaturedProducts'
 FeaturedProducts.propTypes = {
   products: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      basePrice: PropTypes.number.isRequired,
-      salePrice: PropTypes.number,
-      salePercentage: PropTypes.number,
-      note: PropTypes.string,
-      rating: PropTypes.number,
-      imageUrl: PropTypes.string.isRequired,
-      options: PropTypes.shape({
-        color: PropTypes.string,
-        size: PropTypes.string,
-        warranty: PropTypes.string,
-        others: PropTypes.objectOf(PropTypes.any),
-      }),
-    })
-  ).isRequired,
-  onClick: PropTypes.func,
+    PropTypes.shape(ProductCard.propTypes)
+  ).isRequired
 }
 
-export {FeaturedProducts}
+export { FeaturedProducts }

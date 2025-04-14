@@ -10,44 +10,58 @@ export default function HomePage() {
             <Carousel images={['src/assets/images/banner1.webp', 'src/assets/images/banner2.webp', 'src/assets/images/banner3.webp']} />
             <FeaturedProducts products={[{
                 id: '1',
-                name: 'Product 1',
-                basePrice: 100,
-                salePrice: 80,
+                name: 'OPPO Find X8',
+                basePrice: 22900000,
+                salePrice: 20000000,
                 note: 'Best product ever',
                 rating: 4.5,
-                imageUrl: 'src/assets/images/product1.webp',
+                imageUrl: 'src/assets/images/oppo-find-x8.png',
                 options: {
-                    color: 'Red',
-                    size: 'M',
-                    warranty: '2 years',
+                    colors: [
+                        { text: 'Cherry Blossom Pink', value: '#000000' },
+                        { text: 'Moonlight White', value: '#FFFFFF' },
+                        { text: 'Island Blue', value: '#FF0000' },
+                        { text: 'Starry Black', value: '#00FF00' },
+                    ],
+                    sizes: {
+                        text: 'Size',
+                        options: ["16/256"]
+                    },
+                    warranty: ['2 years'],
                     others: {}
                 }
             }, {
                 id: '2',
-                name: 'Product 2',
-                basePrice: 200,
-                salePrice: null,
+                name: 'iPhone 16 Pro Max',
+                basePrice: 34900000,
+                salePrice: 31090000,
                 note: 'Amazing product',
                 rating: 4.0,
-                imageUrl: 'src/assets/images/product2.webp',
+                imageUrl: 'src/assets/images/iphone-16-pro-max.png',
                 options: {
-                    color: 'Blue',
-                    size: 'L',
-                    warranty: '1 year',
+                    colors: ['Blue'],
+                    sizes: {
+                        text: 'Size',
+                        options: ["256 GB", "512 GB", "1 TB"]
+                    },
+                    warranty: ['1 year'],
                     others: {}
                 }
             }, {
                 id: '3',
-                name: 'Product 3',
-                basePrice: 150,
-                salePrice: 120,
+                name: 'OPPO Find N5',
+                basePrice: 44990000,
+                // salePrice: 120,
                 note: 'Great value for money',
                 rating: 4.8,
-                imageUrl: 'src/assets/images/product3.webp',
+                imageUrl: 'src/assets/images/oppo-find-n5.png',
                 options: {
-                    color: 'Green',
-                    size: 'S',
-                    warranty: '6 months',
+                    colors: ['Green'],
+                    sizes: {
+                        text: 'Size',
+                        options: ['S']
+                    },
+                    warranty: ['6 months'],
                     others: {}
                 }
             }]} />
