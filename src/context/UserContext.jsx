@@ -26,6 +26,20 @@ export function UserProvider({ children }) {
     try {
       const response = await axiosInstance.post('/auth/refresh-token');
       setToken(response.data.accessToken);
+      
+      // Set up timer to refresh token before it expires
+      if (response.data.expiresIn) {
+        // Refresh 1 minute before expiration
+        const msToExpiry = response.data.expiresIn * 1000;
+        const refreshTime = msToExpiry - 60000;
+        
+        const tokenTimer = setTimeout(() => {
+          refreshAccessToken();
+        }, refreshTime);
+        
+        // Clean up timer
+        return () => clearTimeout(tokenTimer);
+      }
     } catch (error) {
       console.error('Failed to refresh access token:', error);
       logout(); // Now logout is defined before being used
