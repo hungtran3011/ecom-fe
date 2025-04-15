@@ -4,20 +4,26 @@ import ProductCard from './ProductCard'
 
 const FeaturedProducts = props => {
   return (
-    <section className="grid grid-cols-3 gap-4 p-4">
-
-      {props.products.map(product => (
-        <ProductCard key={product.id} product={product} />
-      ))}
+    <section className="flex items-center justify-center">
+      <h2 className="col-span-3 text-xl font-bold text-[var(--md-sys-color-primary)]">
+        {props.headerText}
+      </h2>
+      <div className="grid grid-flow-row md:grid-cols-3 md:flex gap-4 p-4" aria-label="Featured Products">
+        {props.products.map(product => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
     </section>
   )
 }
 
 FeaturedProducts.defaultProps = {
   onClick: () => { },
+  headerText: '',
 }
 FeaturedProducts.displayName = 'FeaturedProducts'
 FeaturedProducts.propTypes = {
+  headerText: PropTypes.string,
   products: PropTypes.arrayOf(
     PropTypes.shape(ProductCard.propTypes)
   ).isRequired
