@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { useApiClient } from '../libs/api';
 import { useUserContext } from '../hooks/useUserContext';
+import axiosInstance from '../libs/axios';
 
 const API_URL = import.meta.env.API_URL || 'http://localhost:8080/api';
 
@@ -10,12 +10,12 @@ export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const api = useApiClient();
     const navigate = useNavigate();
     const { setUser, setToken } = useUserContext();
     
     const loginMutation = useMutation({
-        mutationFn: (credentials) => api.post(`${API_URL}/auth/sign-in`, credentials),
+        mutationFn: (credentials) => axiosInstance.post(`${API_URL}/auth/sign-in`, credentials, {
+        }),
         onSuccess: (data) => {
             // Store user data and token in context
             setUser(data.user);
@@ -27,7 +27,6 @@ export default function LoginPage() {
             // Handle login error (show message, etc.)
         }
     });
-
     const handleSubmit = (e) => {
         e.preventDefault();
         loginMutation.mutate({ email, password });

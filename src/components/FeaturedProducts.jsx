@@ -8,7 +8,7 @@ const FeaturedProducts = props => {
       <h2 className="col-span-3 text-xl font-bold text-[var(--md-sys-color-primary)]">
         {props.headerText}
       </h2>
-      <div className="grid grid-flow-row md:grid-cols-3 md:flex gap-4 p-4" aria-label="Featured Products">
+      <div className="grid grid-flow-row md:grid-cols-3 gap-4 p-4" aria-label="Featured Products">
         {props.products.map(product => (
           <ProductCard key={product.id} product={product} />
         ))}
