@@ -71,13 +71,6 @@ export function UserProvider({ children }) {
   // Check if user is logged in
   const isLoggedIn = !!token;
 
-  // Effect to refresh token if it's null
-  useEffect(() => {
-    if (!token) {
-      refreshAccessToken();
-    }
-  }, [token, refreshAccessToken]);
-
   return (
     <UserContext.Provider value={{ user, setUser, token, setToken, logout, isLoggedIn }}>
       {children}
