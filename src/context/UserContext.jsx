@@ -36,6 +36,7 @@ export function UserProvider({ children }) {
 
   // Function to refresh the access token
   const refreshAccessToken = useCallback(async () => {
+    let tokenTimer;
     try {
       const response = await axiosInstance.post('/auth/refresh-token');
       setToken(response.data.accessToken);
@@ -44,29 +45,28 @@ export function UserProvider({ children }) {
       if (response.data.expiresIn) {
         // Refresh 1 minute before expiration
         const msToExpiry = response.data.expiresIn * 1000;
-        // Ensure refresh time is positive (min 30 seconds, in case token is short-lived)
-        const refreshTime = Math.max(msToExpiry - 60000, 30000);
+        const refreshTime = msToExpiry - 60000;
         
-        const tokenTimer = setTimeout(() => {
+        tokenTimer = setTimeout(() => {
           refreshAccessToken();
         }, refreshTime);
-        
-        // Clean up timer
-        return () => clearTimeout(tokenTimer);
-      }
-      // Even with no expiresIn, set a fallback refresh timer (8 hours)
-      else {
-        const tokenTimer = setTimeout(() => {
-          refreshAccessToken();
-        }, 8 * 60 * 60 * 1000);
-        
-        return () => clearTimeout(tokenTimer);
       }
     } catch (error) {
       console.error('Failed to refresh access token:', error);
       logout(); // Now logout is defined before being used
     }
+    return () => {
+      if (tokenTimer) clearTimeout(tokenTimer);
+    };
   }, [logout]);
+
+  // Effect to refresh token if it's null
+  useEffect(() => {
+    if (!token) {
+      const cleanup = refreshAccessToken();
+      return cleanup;
+    }
+  }, [token, refreshAccessToken]);
 
   // Check if user is logged in
   const isLoggedIn = !!token;
