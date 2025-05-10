@@ -4,8 +4,6 @@ import { useMutation } from '@tanstack/react-query';
 import { useUserContext } from '../hooks/useUserContext';
 import axiosInstance from '../libs/axios';
 
-const API_URL = import.meta.env.API_URL || 'http://localhost:8080/api';
-
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -14,7 +12,7 @@ export default function LoginPage() {
     const { setUser, setToken } = useUserContext();
     
     const loginMutation = useMutation({
-        mutationFn: (credentials) => axiosInstance.post(`${API_URL}/auth/sign-in`, credentials, {
+        mutationFn: (credentials) => axiosInstance.post(`/auth/sign-in`, credentials, {
         }),
         onSuccess: (data) => {
             // Store user data and token in context
