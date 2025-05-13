@@ -278,7 +278,7 @@ export default function ProductCategoryPage() {
                             </p>
                             <button
                                 onClick={() => {
-                                    setSearchParams({ category });
+                                    setSearchParams({}); // clear all search parameters
                                     setFilters({
                                         minPrice: '',
                                         maxPrice: '',
