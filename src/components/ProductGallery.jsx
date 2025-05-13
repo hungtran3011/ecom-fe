@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 
-export default function ProductGallery({ images }) {
+export default function ProductGallery({ images = [] }) {
     const [selectedImage, setSelectedImage] = useState(0);
     
     // Use placeholder if no images
-    const displayImages = images.length 
-        ? images 
+    const displayImages = (images && images.length)
+        ? images
         : ['/images/placeholder.png'];
     
     return (
