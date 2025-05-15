@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 // import { ChevronRightIcon } from '@radix-ui/react-icons';
 
-export default function CategoryBreadcrumb({ category, categoryId }) {
+export default function CategoryBreadcrumb({ category }) {
   return (
     <NavigationMenu.Root className="mb-6" orientation="horizontal">
       <NavigationMenu.List className="flex items-center flex-wrap text-sm text-[var(--md-sys-color-on-surface-variant)]">

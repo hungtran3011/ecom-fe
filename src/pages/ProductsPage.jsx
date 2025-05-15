@@ -12,8 +12,12 @@ export default function ProductsPage() {
     const { data: categories, isLoading, error } = useQuery({
         queryKey: ['categories'],
         queryFn: async () => {
-            const response = await axiosInstance.get('/products/category');
+            const response = await axiosInstance.get('/product/category');
             return response.data;
+        },
+        onError: (error) => {
+            console.error('Error fetching categories:', error);
+            // Handle error (e.g., show a message)
         }
     });
     
@@ -21,9 +25,13 @@ export default function ProductsPage() {
     useQuery({
         queryKey: ['featuredProducts'],
         queryFn: async () => {
-            const response = await axiosInstance.get('/products?limit=4&sortBy=-createdAt');
+            const response = await axiosInstance.get('/product?limit=4&sortBy=-createdAt');
             setFeaturedProducts(response.data.products || []);
             return response.data;
+        },
+        onError: (error) => {
+            console.error('Error fetching featured products:', error);
+            // Handle error (e.g., show a message)
         }
     });
     
@@ -57,7 +65,7 @@ export default function ProductsPage() {
                     {categories.map(category => (
                         <Link
                             key={category._id}
-                            to={`/products/${category._id}`}
+                            to={`/products/${category.name}`}
                             className="block group"
                         >
                             <div className="bg-[var(--md-sys-color-surface-container)] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">

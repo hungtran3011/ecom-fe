@@ -10,6 +10,7 @@ import ProductCategoryPage from './pages/ProductCategoryPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import ProductDetailsPage from './pages/ProductDetailsPage.jsx';
+import CartPage from './pages/CartPage.jsx';
 
 export function AppRoutes() {
   return (
@@ -25,8 +26,9 @@ export function AppRoutes() {
         <Route path="products" element={<ProductsPage />} />
         <Route path="products/:category" element={<ProductCategoryPage />} />
         <Route path="product/:productId" element={<ProductDetailsPage />} />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route path="cart" element={<CartPage />} />
       </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

@@ -28,10 +28,10 @@ export default function FilterPanel({ filters, onFilterChange, categoryFields = 
     };
     
     const toggleSection = (section, open) => {
-        setExpanded({
-            ...expanded,
-            [section]: open
-        });
+        setExpanded((prev) => ({
+            ...prev,
+            [section]: open,
+        }));
     };
     
     return (
@@ -91,7 +91,7 @@ export default function FilterPanel({ filters, onFilterChange, categoryFields = 
                             <Checkbox.Root
                                 id="inStock"
                                 checked={filters.inStock}
-                                onCheckedChange={(checked) => handleStockChange(checked)}
+                                onCheckedChange={(checked) => handleStockChange(!!checked)}
                                 className="rounded-sm text-[var(--md-sys-color-primary)] focus:ring-[var(--md-sys-color-primary)]"
                             >
                                 <Checkbox.Indicator>
@@ -150,7 +150,7 @@ export default function FilterPanel({ filters, onFilterChange, categoryFields = 
                                                 <Checkbox.Root
                                                     id={`field-${field.name}`}
                                                     checked={!!filters.fields[field.name]}
-                                                    onCheckedChange={(checked) => handleFieldChange(field.name, checked)}
+                                                    onCheckedChange={(checked) => handleFieldChange(field.name, !!checked)}
                                                     className="rounded-sm text-[var(--md-sys-color-primary)] focus:ring-[var(--md-sys-color-primary)]"
                                                 >
                                                     <Checkbox.Indicator>
