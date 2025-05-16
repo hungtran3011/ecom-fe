@@ -1,13 +1,19 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import * as ToggleGroup from '@radix-ui/react-toggle-group'
+import { Link } from 'react-router-dom'
+import { formatCurrency } from '../utils/formatCurrency'
 
 function ProductCard(props) {
     const { product } = props;
     const hasDiscount = product.salePrice && product.salePrice < product.basePrice;
 
     return (
-        <div className="relative block rounded-2xl border border-[var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-4 shadow-sm max-w-xs min-w-60 w-1/3 md:w-1/10 cursor-pointer" aria-label="Product Card" onClick={props.onClick}>
+        <div 
+            className="relative block rounded-2xl border border-[var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-4 shadow-sm w-full cursor-pointer transition-shadow hover:shadow-md" 
+            aria-label="Product Card" 
+            onClick={props.onClick}
+        >
             {/* Discount tag */}
             {hasDiscount && (
                 <div className="absolute top-0 right-0">
@@ -19,16 +25,20 @@ function ProductCard(props) {
 
             <div className="flex flex-col items-center gap-4">
                 {/* Product image */}
-                <div className="w-32 h-32 flex items-center justify-center">
+                <div className="aspect-square w-full max-w-[160px] flex items-center justify-center mb-2">
                     <img
                         src={product.imageUrl}
                         alt={product.name}
                         className="w-full h-full object-contain"
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '/images/placeholder.png';
+                        }}
                     />
                 </div>
 
                 {/* Product name */}
-                <h3 className="text-center text-base font-semibold text-[var(--md-sys-color-on-surface)]">
+                <h3 className="text-center text-base font-semibold text-[var(--md-sys-color-on-surface)] line-clamp-2 min-h-[48px] w-full">
                     {product.name}
                 </h3>
 
@@ -36,46 +46,53 @@ function ProductCard(props) {
                 <div className="flex items-center justify-center gap-2">
                     {hasDiscount ? (
                         <>
-                            <span className="text-[var(--md-sys-color-on-surface)] line-through text-sm">
-                                {product.basePrice.toLocaleString()}
+                            <span className="text-[var(--md-sys-color-on-surface-variant)] line-through text-sm">
+                                {formatCurrency(product.basePrice)}
                             </span>
                             <span className="text-[var(--md-sys-color-primary)] font-medium">
-                                {product.salePrice.toLocaleString()}
+                                {formatCurrency(product.salePrice)}
                             </span>
                         </>
                     ) : (
                         <span className="text-[var(--md-sys-color-primary)] font-medium">
-                            {product.basePrice.toLocaleString()}
+                            {formatCurrency(product.basePrice)}
                         </span>
                     )}
                 </div>
 
                 {/* Storage options */}
                 {product.options?.sizes?.options?.length > 0 && (
-                    <div className="flex flex-col gap-3 w-full">
-                        <p className="text-[var(--md-sys-color-on-surface)]">{product.options.sizes.text}</p>
-                        <div className="justify-center items-center flex w-full">
+                    <div className="flex flex-col gap-2 w-full">
+                        <p className="text-[var(--md-sys-color-on-surface-variant)] text-sm">
+                            {product.options.sizes.text}
+                        </p>
+                        <div className="flex flex-wrap justify-center w-full gap-1">
                             <ToggleGroup.Root
                                 type="single"
                                 defaultValue={product.options.sizes.options[0]}
-                                className="flex flex-wrap justify-items-stretch gap-2 w-full"
+                                className="flex flex-wrap justify-center gap-1 w-full"
                                 aria-label="Storage options"
                             >
-                                {product.options.sizes.options.map((size) => (
+                                {product.options.sizes.options.slice(0, 3).map((size) => (
                                     <ToggleGroup.Item
                                         key={size}
                                         value={size}
                                         className="
-                                        px-3 py-1.5 rounded-full border border-[var(--md-sys-color-outline)] text-sm
+                                        px-2 py-1 rounded-full border border-[var(--md-sys-color-outline)] text-xs
                                         text-[var(--md-sys-color-on-surface)]
-                                                  data-[state=on]:bg-[var(--md-sys-color-primary-container)]
-                                                  data-[state=on]:border-[var(--md-sys-color-primary)]
-                                                  data-[state=on]:text-[var(--md-sys-color-on-primary-container)]
-                                                  transition-colors duration-200"
+                                        data-[state=on]:bg-[var(--md-sys-color-primary-container)]
+                                        data-[state=on]:border-[var(--md-sys-color-primary)]
+                                        data-[state=on]:text-[var(--md-sys-color-on-primary-container)]
+                                        transition-colors duration-200"
                                     >
                                         {size}
                                     </ToggleGroup.Item>
                                 ))}
+                                {product.options.sizes.options.length > 3 && (
+                                    <span className="text-xs text-[var(--md-sys-color-on-surface-variant)]">
+                                        +{product.options.sizes.options.length - 3} more
+                                    </span>
+                                )}
                             </ToggleGroup.Root>
                         </div>
                     </div>
@@ -83,29 +100,23 @@ function ProductCard(props) {
 
                 {/* Color options */}
                 {product.options?.colors?.length > 0 && (
-                    <div className="flex flex-col gap-3 items-center w-full">
-                        <p className="text-[var(--md-sys-color-on-surface)] w-full">Colors</p>
-                        <ToggleGroup.Root
-                            type="single"
-                            defaultValue={product.options.colors[0]?.value || ""}
-                            className="flex flex-col justify-center gap-2 w-full"
-                            aria-label="Color options"
-                        >
-                            {product.options.colors.map((color) => (
-                                <ToggleGroup.Item
+                    <div className="flex flex-col gap-2 w-full">
+                        <p className="text-[var(--md-sys-color-on-surface-variant)] text-sm">Colors</p>
+                        <div className="flex flex-wrap justify-center gap-1">
+                            {product.options.colors.slice(0, 4).map((color) => (
+                                <div
                                     key={color.value}
-                                    value={color.value}
-                                    className="px-3 py-1.5 rounded-full border border-[var(--md-sys-color-outline)] 
-                                    text-[var(--md-sys-color-on-surface)]
-                                              data-[state=on]:bg-[var(--md-sys-color-primary-container)]
-                                              data-[state=on]:border-[var(--md-sys-color-primary)]
-                                              data-[state=on]:text-[var(--md-sys-color-on-primary-container)]
-                                              transition-colors duration-200"
-                                >
-                                    {color.text}
-                                </ToggleGroup.Item>
+                                    className="w-6 h-6 rounded-full border border-[var(--md-sys-color-outline)]"
+                                    style={{ backgroundColor: color.value }}
+                                    title={color.text}
+                                />
                             ))}
-                        </ToggleGroup.Root>
+                            {product.options.colors.length > 4 && (
+                                <span className="text-xs text-[var(--md-sys-color-on-surface-variant)]">
+                                    +{product.options.colors.length - 4} more
+                                </span>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>
