@@ -19,7 +19,8 @@ export default function UserMenuDropdown({ isMobile = false }) {
             label="Account"
           />
         ) : (
-          <button             className="flex p-2 hover:bg-[var(--md-sys-color-surface-variant)] rounded-full transition-colors"
+          <button             
+            className="flex p-2 hover:bg-[var(--md-sys-color-surface-variant)] rounded-full transition-colors"
             aria-label="User menu"
           >
             <span className="mdi text-[var(--md-sys-color-on-surface)]">

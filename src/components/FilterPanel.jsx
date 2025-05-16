@@ -22,6 +22,7 @@ export default function FilterPanel({ filters, onFilterChange, categoryFields = 
         onFilterChange({
             fields: {
                 ...(filters.fields || {}),
+                ...filters.fields,
                 [fieldName]: value
             }
         });
