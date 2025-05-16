@@ -19,8 +19,7 @@ export default function UserMenuDropdown({ isMobile = false }) {
             label="Account"
           />
         ) : (
-          <button 
-            className="flex p-2 hover:bg-[var(--md-sys-color-surface-variant)] rounded-full transition-colors"
+          <button             className="flex p-2 hover:bg-[var(--md-sys-color-surface-variant)] rounded-full transition-colors"
             aria-label="User menu"
           >
             <span className="mdi text-[var(--md-sys-color-on-surface)]">
@@ -32,10 +31,9 @@ export default function UserMenuDropdown({ isMobile = false }) {
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          className="min-w-[220px] bg-[var(--md-sys-color-surface)] rounded-lg shadow-lg p-2 z-50"
+          className="min-w-[200px] bg-[var(--md-sys-color-surface)] rounded-lg shadow-lg p-2 z-50"
           sideOffset={5}
-          align={isMobile ? "center" : "end"}
-          side={isMobile ? "top" : "bottom"}
+          align="end"
         >
           {isLoggedIn ? (
             <>

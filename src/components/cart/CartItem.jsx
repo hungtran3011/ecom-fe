@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import CartQuantitySelector from './CartQuantitySelector';
 import { formatCurrency } from '../../utils/formatCurrency';
 
@@ -71,3 +72,18 @@ export default function CartItem({ item, index, onRemove, onUpdateQuantity }) {
     </div>
   );
 }
+
+CartItem.propTypes = {
+  item: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    image: PropTypes.string,
+    quantity: PropTypes.number.isRequired,
+    variationId: PropTypes.string,
+    variationName: PropTypes.string,
+  }).isRequired,
+  index: PropTypes.number.isRequired,
+  onRemove: PropTypes.func.isRequired,
+  onUpdateQuantity: PropTypes.func.isRequired,
+};

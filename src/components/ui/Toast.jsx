@@ -60,7 +60,7 @@ export function ToastProvider({ children }) {
                 <button 
                   className="inline-flex h-8 items-center justify-center rounded-md bg-[var(--md-sys-color-primary)] px-3 text-xs font-medium text-[var(--md-sys-color-on-primary)]"
                   onClick={() => {
-                    action.onClick();
+                    if (typeof action.onClick === 'function') action.onClick();
                     dismiss(id);
                   }}
                 >

@@ -8,6 +8,7 @@ import DesktopNavigation from './components/navigation/DesktopNavigation';
 import SearchBar from './components/navigation/SearchBar';
 import Footer from './components/navigation/Footer';
 import CartIcon from './components/cart/CartIcon';
+import NotificationDialog from './components/navigation/NotificationDialog';
 
 const LOGO = "/images/logo.jpg";
 
@@ -43,11 +44,7 @@ export default function Layout() {
               <DesktopNavigation logoUrl={LOGO} />
               <SearchBar />
               <div className="flex items-center justify-center gap-6">
-                <button className="flex p-2 hover:bg-[var(--md-sys-color-surface-variant)] rounded-full transition-colors">
-                  <span className="mdi text-[var(--md-sys-color-on-surface)]">
-                    notifications
-                  </span>
-                </button>
+                <NotificationDialog/>
                 <CartIcon />
                 <UserMenuDropdown />
               </div>

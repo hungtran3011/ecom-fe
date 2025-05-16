@@ -21,7 +21,7 @@ export default function FilterPanel({ filters, onFilterChange, categoryFields = 
     const handleFieldChange = (fieldName, value) => {
         onFilterChange({
             fields: {
-                ...filters.fields,
+                ...(filters.fields || {}),
                 [fieldName]: value
             }
         });
