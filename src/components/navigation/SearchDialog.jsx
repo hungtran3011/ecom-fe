@@ -2,8 +2,9 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { useState } from 'react';
 import BottomNavigationButton from './BottomNavigationButton';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
-export default function SearchDialog() {
+export default function SearchDialog({ isMobile = false }) {
   const [searchQuery, setSearchQuery] = useState('');
   const recentSearches = [
     'iPhone 16 Pro',
@@ -26,6 +27,17 @@ export default function SearchDialog() {
     { id: '3', name: 'MacBook Air M3', price: 1299, image: '/images/product3.jpg' },
     { id: '4', name: 'AirPods Pro 2', price: 249, image: '/images/product4.jpg' }
   ];
+
+  // For mobile, just render a button that navigates to the search page
+  if (isMobile) {
+    return (
+      <BottomNavigationButton 
+        icon="search"
+        label="Search"
+        to="/search"
+      />
+    );
+  }
 
   return (
     <Dialog.Root>
@@ -148,3 +160,7 @@ export default function SearchDialog() {
     </Dialog.Root>
   );
 }
+
+SearchDialog.propTypes = {
+  isMobile: PropTypes.bool
+};
