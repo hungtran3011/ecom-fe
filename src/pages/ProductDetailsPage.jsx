@@ -5,85 +5,84 @@ import axiosInstance from '../libs/axios';
 import { useCartContext } from '../hooks/useCartContext';
 import { useToast } from '../hooks/useToast';
 import ProductGallery from '../components/ProductGallery';
-import ProductVariationSelector from '../components/ProductVariationSelector';
+import ProductVariantSelector from '../components/ProductVariantSelector';
 import ProductTabs from '../components/ProductTabs';
 import RelatedProducts from '../components/RelatedProducts';
 import LoadingProductDetail from '../components/LoadingProductDetail';
 import ErrorDisplay from '../components/ErrorDisplay';
+import { formatCurrency } from '../utils/formatCurrency';
 
 export default function ProductDetailsPage() {
     const { productId } = useParams();
     const navigate = useNavigate();
-    const [selectedVariation, setSelectedVariation] = useState(null);
+    const [selectedVariant, setSelectedVariant] = useState(null);
     const { addToCart } = useCartContext();
     const { toast } = useToast();
     const [quantity, setQuantity] = useState(1);
 
     // Fetch product details
-    const { data: product, isLoading, error } = useQuery({
+    const { data: product, isLoading: productLoading, error: productError } = useQuery({
         queryKey: ['product', productId],
         queryFn: async () => {
             const response = await axiosInstance.get(`/product/${productId}`);
             return response.data;
         },
-        onError: (error) => {
-            console.error('Error fetching product details:', error);
-            toast({
-                title: "Error",
-                description: "Failed to load product details.",
-                type: "foreground"
-            });
-        }
     });
 
     // Fetch product variations
-    const { data: variations } = useQuery({
+    const { data: variants, isLoading: variantsLoading, error: variantsError } = useQuery({
         queryKey: ['variations', productId],
         queryFn: async () => {
             const response = await axiosInstance.get(`/product/${productId}/variations`);
             return response.data;
         },
-        enabled: !!product?.hasVariations,
-        onError: (error) => {
-            console.error('Error fetching product variations:', error);
-            toast({
-                title: "Error",
-                description: "Failed to load product variations.",
-                type: "foreground"
-            });
-        }
+        enabled: !!product?.hasVariations, // Only fetch if product has variations
     });
 
-    // Set default variation when data is loaded
+    // Set default variation when variants are loaded
     useEffect(() => {
-        if (variations && variations.length > 0) {
-            const defaultVariation = variations.find(v => v.isDefault) || variations[0];
-            setSelectedVariation(defaultVariation);
+        if (variants && variants.length > 0) {
+            // Find default variant, or use first one
+            const defaultVariant = variants.find(v => v.isDefault) || variants[0];
+            setSelectedVariant(defaultVariant);
         }
-    }, [variations]);
+    }, [variants]);
 
     // Handle variation change
-    const handleVariationChange = (variation) => {
-        setSelectedVariation(variation);
+    const handleVariantChange = (variant) => {
+        setSelectedVariant(variant);
     };
 
     // Handle add to cart
     const handleAddToCart = () => {
-        if (product.hasVariations && !selectedVariation) {
+        // Check if we need a variant selection but none is selected
+        if (product.hasVariations && !selectedVariant) {
             toast({
                 title: "Selection Required",
                 description: "Please select a product variation.",
-                type: "foreground"
+                type: "error"
             });
             return;
         }
 
+        // Check if selected variant is out of stock
+        if (selectedVariant && selectedVariant.stock === 0) {
+            toast({
+                title: "Out of Stock",
+                description: "This product variant is currently out of stock.",
+                type: "error"
+            });
+            return;
+        }
+
+        // Add to cart with variant information if applicable
         addToCart({
             id: productId,
             name: product.name,
-            price: selectedVariation?.price || product.price,
+            price: selectedVariant?.price || product.price,
             image: product.productImages?.[0] || '/images/placeholder.png',
-            variationId: selectedVariation?._id,
+            variationId: selectedVariant?._id,
+            variationName: selectedVariant?.name || '', // Just use the variant name directly
             quantity: quantity
         });
 
@@ -93,24 +92,28 @@ export default function ProductDetailsPage() {
             action: {
                 label: "View Cart",
                 onClick: () => navigate("/cart"),
-                altText: "View your cart"
             },
             duration: 5000
         });
     };
 
-    if (isLoading) {
+    if (productLoading || (product?.hasVariations && variantsLoading)) {
         return <LoadingProductDetail />;
     }
 
-    if (error) {
-        return <ErrorDisplay error={error} />;
+    if (productError || variantsError) {
+        return <ErrorDisplay error={productError || variantsError} />;
     }
 
-    // Determine current price (from variation or base product)
-    const currentPrice = selectedVariation?.price || product.price;
-    const salePrice = product.salePrice;
-    const hasDiscount = salePrice && salePrice < currentPrice;
+    // Determine current price (from variant or base product)
+    const currentPrice = selectedVariant?.price || product.price;
+    const hasDiscount = product.salePrice && product.salePrice < currentPrice;
+    const displayPrice = hasDiscount ? product.salePrice : currentPrice;
+
+    // Determine stock availability
+    const inStock = product.hasVariations 
+        ? (selectedVariant?.stock > 0) 
+        : (product.stock > 0);
 
     return (
         <div className="container mx-auto py-8 px-4">
@@ -155,148 +158,125 @@ export default function ProductDetailsPage() {
                                 {hasDiscount ? (
                                     <>
                                         <span className="text-3xl font-bold text-[var(--md-sys-color-primary)]">
-                                            {salePrice.toLocaleString()} đ
+                                            {formatCurrency(product.salePrice)}
                                         </span>
                                         <span className="text-xl line-through text-[var(--md-sys-color-on-surface-variant)]">
-                                            {currentPrice.toLocaleString()} đ
+                                            {formatCurrency(currentPrice)}
                                         </span>
                                         <span className="bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] px-2 py-1 rounded text-sm">
-                                            -{Math.round((currentPrice - salePrice) / currentPrice * 100)}%
+                                            -{Math.round((currentPrice - product.salePrice) / currentPrice * 100)}%
                                         </span>
                                     </>
                                 ) : (
                                     <span className="text-3xl font-bold text-[var(--md-sys-color-primary)]">
-                                        {currentPrice.toLocaleString()} đ
+                                        {formatCurrency(currentPrice)}
                                     </span>
                                 )}
                             </div>
                         </div>
+
+                        {/* Mobile Add to Cart Button (simplified for mobile screens) */}
                         <div className="flex flex-row items-center justify-center gap-4 w-full md:hidden">
-                            {/* Quantity selector */}
-                            {/* Add to cart button */}
                             <button
                                 onClick={handleAddToCart}
-                                disabled={(product.hasVariations && !selectedVariation) ||
-                                    (product.hasVariations ? selectedVariation?.stock === 0 : product.stock === 0)}
-                                className="py-3 bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed w-full flex items-center justify-center"
+                                disabled={product.hasVariations && !selectedVariant || !inStock}
+                                className="py-3 w-full bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                             >
                                 Add to Cart
                             </button>
-                            <div className="flex items-center justify-center gap-4">
-                                <span className="font-medium text-[var(--md-sys-color-on-surface)]">Quantity:</span>
-                                <div className="flex border border-[var(--md-sys-color-outline)] rounded">
-                                    <button
-                                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                        className="px-3 py-1 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-variant)]"
-                                    >
-                                        -
-                                    </button>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={quantity}
-                                        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                        className="w-10 text-center border-x border-[var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] text-[var(--md-sys-color-on-surface)]"
-                                    />
-                                    <button
-                                        onClick={() => setQuantity(q => q + 1)}
-                                        className="px-3 py-1 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-variant)]"
-                                    >
-                                        +
-                                    </button>
+                        </div>
+
+                        {/* Short description */}
+                        <p className="text-[var(--md-sys-color-on-surface-variant)]">
+                            {product.description?.substring(0, 150)}
+                            {product.description?.length > 150 ? '...' : ''}
+                        </p>
+
+                        {/* SKU & Stock */}
+                        <div className="flex flex-col gap-2">
+                            <p className="text-[var(--md-sys-color-on-surface-variant)]">
+                                <span className="font-medium">SKU:</span> {selectedVariant?.sku || product.sku || 'N/A'}
+                            </p>
+                            <p className="text-[var(--md-sys-color-on-surface-variant)]">
+                                <span className="font-medium">Availability:</span> {' '}
+                                {inStock ? (
+                                    <span className="text-green-600">In Stock</span>
+                                ) : (
+                                    <span className="text-red-600">Out of Stock</span>
+                                )}
+                            </p>
+                        </div>
+
+                        {/* Variation selector */}
+                        {product.hasVariations && variants && variants.length > 0 && (
+                            <ProductVariantSelector
+                                variants={variants}
+                                selectedVariant={selectedVariant}
+                                onVariantChange={handleVariantChange}
+                                disabled={!inStock}
+                            />
+                        )}
+
+                        {/* Quantity selector */}
+                        <div className="flex items-center gap-4">
+                            <span className="font-medium text-[var(--md-sys-color-on-surface)]">Quantity:</span>
+                            <div className="flex border border-[var(--md-sys-color-outline)] rounded-lg">
+                                <button
+                                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                    disabled={!inStock}
+                                    className="px-3 py-1 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-variant)] disabled:opacity-50"
+                                >
+                                    -
+                                </button>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max={selectedVariant?.stock || 99}
+                                    value={quantity}
+                                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                                    disabled={!inStock}
+                                    className="w-16 text-center border-x border-[var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] text-[var(--md-sys-color-on-surface)] disabled:opacity-50"
+                                />
+                                <button
+                                    onClick={() => setQuantity(q => q + 1)}
+                                    disabled={!inStock || (selectedVariant && quantity >= selectedVariant.stock)}
+                                    className="px-3 py-1 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-variant)] disabled:opacity-50"
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Add to cart button - desktop only */}
+                        <button
+                            onClick={handleAddToCart}
+                            disabled={product.hasVariations && !selectedVariant || !inStock}
+                            className="mt-4 py-3 bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed hidden md:block"
+                        >
+                            {!inStock ? 'Out of Stock' : 'Add to Cart'}
+                        </button>
+
+                        {/* Custom fields */}
+                        {product.fields && Object.keys(product.fields).length > 0 && (
+                            <div className="mt-6 border-t border-[var(--md-sys-color-outline)] pt-6">
+                                <h3 className="text-lg font-medium mb-4 text-[var(--md-sys-color-on-surface)]">
+                                    Specifications
+                                </h3>
+                                <div className="grid grid-cols-1 gap-3">
+                                    {Object.entries(product.fields).map(([key, value]) => (
+                                        <div key={key} className="flex">
+                                            <span className="w-1/3 font-medium text-[var(--md-sys-color-on-surface)]">
+                                                {key}:
+                                            </span>
+                                            <span className="w-2/3 text-[var(--md-sys-color-on-surface-variant)]">
+                                                {typeof value === 'object' ? JSON.stringify(value) : value}
+                                            </span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
-
-                    {/* Short description */}
-                    <p className="text-[var(--md-sys-color-on-surface-variant)]">
-                        {product.description?.substring(0, 150)}
-                        {product.description?.length > 150 ? '...' : ''}
-                    </p>
-
-                    {/* SKU & Stock */}
-                    <div className="flex flex-col gap-2">
-                        <p className="text-[var(--md-sys-color-on-surface-variant)]">
-                            <span className="font-medium">SKU:</span> {selectedVariation?.sku || product.sku || 'N/A'}
-                        </p>
-                        <p className="text-[var(--md-sys-color-on-surface-variant)]">
-                            <span className="font-medium">Availability:</span> {' '}
-                            {(product.hasVariations
-                                ? selectedVariation?.stock > 0
-                                : product.stock > 0) ? (
-                                <span className="text-green-600">In Stock</span>
-                            ) : (
-                                <span className="text-red-600">Out of Stock</span>
-                            )}
-                        </p>
-                    </div>
-
-                    {/* Variation selector */}
-                    {product.hasVariations && variations && (
-                        <ProductVariationSelector
-                            variations={variations}
-                            selectedVariation={selectedVariation}
-                            onVariationChange={handleVariationChange}
-                        />
-                    )}
-
-                    {/* Quantity selector */}
-                    <div className="tems-center gap-4 hidden md:flex">
-                        <span className="font-medium text-[var(--md-sys-color-on-surface)]">Quantity:</span>
-                        <div className="flex border border-[var(--md-sys-color-outline)] rounded">
-                            <button
-                                onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                className="px-3 py-1 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-variant)]"
-                            >
-                                -
-                            </button>
-                            <input
-                                type="number"
-                                min="1"
-                                value={quantity}
-                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                className="w-16 text-center border-x border-[var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] text-[var(--md-sys-color-on-surface)]"
-                            />
-                            <button
-                                onClick={() => setQuantity(q => q + 1)}
-                                className="px-3 py-1 text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-variant)]"
-                            >
-                                +
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Add to cart button */}
-                    <button
-                        onClick={handleAddToCart}
-                        disabled={(product.hasVariations && !selectedVariation) ||
-                            (product.hasVariations ? selectedVariation?.stock === 0 : product.stock === 0)}
-                        className="mt-4 py-3 bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] rounded-full hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed hidden md:block"
-                    >
-                        Add to Cart
-                    </button>
-
-                    {/* Custom fields */}
-                    {product.fields && Object.keys(product.fields).length > 0 && (
-                        <div className="mt-6 border-t border-[var(--md-sys-color-outline)] pt-6">
-                            <h3 className="text-lg font-medium mb-4 text-[var(--md-sys-color-on-surface)]">
-                                Specifications
-                            </h3>
-                            <div className="grid grid-cols-1 gap-3">
-                                {Object.entries(product.fields).map(([key, value]) => (
-                                    <div key={key} className="flex">
-                                        <span className="w-1/3 font-medium text-[var(--md-sys-color-on-surface)]">
-                                            {key}:
-                                        </span>
-                                        <span className="w-2/3 text-[var(--md-sys-color-on-surface-variant)]">
-                                            {typeof value === 'object' ? JSON.stringify(value) : value}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
 

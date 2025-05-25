@@ -17,9 +17,9 @@ export default function Layout() {
   const isMobile = windowWidth < 1024;
 
   return (
-    <>
-      <div className="flex items-center justify-center">
-        <div className="flex px-6 py-4 items-center justify-between gap-6 w-full bg-[var(--md-sys-color-surface-container-low)]">
+    <div className="flex flex-col min-h-screen">
+      <header className="flex items-center justify-center sticky top-0 z-30 bg-[var(--md-sys-color-surface-container-low)] shadow-sm">
+        <div className="flex px-6 py-4 items-center justify-between gap-6 w-full">
           {isMobile ? (
             <>
               {/* Mobile header */}
@@ -51,15 +51,18 @@ export default function Layout() {
             </>
           )}
         </div>
-      </div>
+      </header>
 
-      <main className="min-h-[calc(100vh-180px)] pb-16 md:pb-0">
+      <main className="flex-1">
         <Outlet />
+        
+        {/* Add spacer only on mobile to prevent content from being hidden behind bottom navigation */}
+        {isMobile && <div className="h-20"></div>}
       </main>
       
-      <Footer />
+      {!isMobile && <Footer />}
 
       {isMobile && <BottomNavigation />}
-    </>
+    </div>
   );
 }
