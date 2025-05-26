@@ -144,7 +144,7 @@ export default function HomePage() {
                     {featuredLoading ? (
                         <>
                             <Skeleton variant="title" width="200px" className="mb-6 mx-auto" />
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-flow-row gap-6">
                                 {[1, 2, 3, 4].map(i => (
                                     <Skeleton key={i} variant="container" className="h-80 rounded-lg" />
                                 ))}

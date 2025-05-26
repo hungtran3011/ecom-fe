@@ -10,7 +10,7 @@ function ProductCard(props) {
 
     return (
         <div 
-            className="relative block rounded-2xl border border-[var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-4 shadow-sm w-full cursor-pointer transition-shadow hover:shadow-md" 
+            className="relative block rounded-2xl border border-[var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-4 shadow-sm w-full cursor-pointer transition-shadow hover:shadow-md max-w-3xs" 
             aria-label="Product Card" 
             onClick={props.onClick}
         >
