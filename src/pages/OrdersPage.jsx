@@ -66,6 +66,7 @@ function OrderItem({ item }) {
         {getVariationText() && (
           <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] truncate">
             {getVariationText()}
+
           </p>
         )}
       </div>
@@ -337,8 +338,7 @@ export default function OrdersPage() {
   // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
-  };
-  
+  };  
   // Handle order cancellation
   const handleCancelOrder = async (orderId) => {
     try {
