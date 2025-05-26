@@ -106,8 +106,9 @@ export default function CheckoutPage() {
         shippingMethod,
         paymentMethod
       };
-      localStorage.setItem('checkoutFormData', JSON.stringify(dataToSave));
-      console.log('Data saved to localStorage:', dataToSave);
+      const encryptedData = encryptData(JSON.stringify(dataToSave));
+      localStorage.setItem('checkoutFormData', encryptedData);
+      console.log('Encrypted data saved to localStorage:', encryptedData);
     } catch (error) {
       console.error('Error saving to localStorage:', error);
     }
