@@ -7,41 +7,83 @@ import axiosInstance from '../libs/axios';
 import { formatCurrency } from '../utils/formatCurrency';
 import Pagination from '../components/Pagination';
 
-// Order item component to display in the expanded view
+// Order item component - Keep unchanged
 function OrderItem({ item }) {
+  // Handle various backend response structures
+  const productName = item.name || item.product?.name || 'Product Name Unavailable';
+  
+  // Handle different image field formats
+  const productImage = 
+    item.image || 
+    item.product?.image || 
+    item.product?.productImages?.[0] || 
+    '/images/placeholder.png';
+  
+  // Get price from various possible fields
+  const itemPrice = item.unitPrice || item.price || item.product?.price || 0;
+  
+  // Handle variations with different possible structures
+  const variationInfo = 
+    item.variationName || 
+    (item.variationId && item.product?.variations?.find(v => v._id === item.variationId)?.name) ||
+    '';
+
+  // Get variation attributes if available
+  const variationAttributes = item.attributes || 
+    (item.variationId && item.product?.variations?.find(v => v._id === item.variationId)?.attributes) || 
+    [];
+    
+  // Format variation text
+  const getVariationText = () => {
+    if (variationInfo) return `Variation: ${variationInfo}`;
+    
+    if (variationAttributes && variationAttributes.length > 0) {
+      return variationAttributes
+        .map(attr => `${attr.type || Object.keys(attr)[0]}: ${attr.value || Object.values(attr)[0]}`)
+        .join(', ');
+    }
+    
+    return '';
+  };
+  
   return (
-    <div className="flex items-center gap-3 p-3 border-b border-[var(--md-sys-color-outline-variant)]">
-      <div className="w-16 h-16 flex-shrink-0">
+    <div className="flex items-center gap-3 p-3 border-b last:border-b-0 border-[var(--md-sys-color-outline-variant)]">
+      <div className="w-16 h-16 flex-shrink-0 bg-[var(--md-sys-color-surface-variant)] rounded overflow-hidden">
         <img 
-          src={item.image || '/images/placeholder.png'} 
-          alt={item.name}
+          src={productImage}
+          alt={productName}
           className="w-full h-full object-contain"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = '/images/placeholder.png';
+          }}
         />
       </div>
-      <div className="flex-1">
-        <p className="font-medium text-[var(--md-sys-color-on-surface)]">
-          {item.name}
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-[var(--md-sys-color-on-surface)] truncate">
+          {productName}
         </p>
-        {item.variationName && (
-          <p className="text-sm text-[var(--md-sys-color-on-surface-variant)]">
-            Variation: {item.variationName}
+        {getVariationText() && (
+          <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] truncate">
+            {getVariationText()}
+
           </p>
         )}
       </div>
       <div className="text-right">
-        <p className="text-[var(--md-sys-color-on-surface)]">
-          {item.quantity} × {formatCurrency(item.price)}
+        <p className="text-[var(--md-sys-color-on-surface)] whitespace-nowrap">
+          {item.quantity} × {formatCurrency(itemPrice)}
         </p>
-        <p className="font-medium text-[var(--md-sys-color-on-surface)]">
-          {formatCurrency(item.price * item.quantity)}
+        <p className="font-medium text-[var(--md-sys-color-on-surface)] whitespace-nowrap">
+          {formatCurrency(itemPrice * item.quantity)}
         </p>
       </div>
     </div>
   );
 }
 
-// Component to display an individual order
-function OrderCard({ order, isExpanded, onToggleExpand }) {
+// OrderCard component - Keep unchanged but ensure it works with backend data format
+function OrderCard({ order, isExpanded, onToggleExpand, handleCancelOrder }) {
   const statusColors = {
     'pending': 'bg-yellow-100 text-yellow-800',
     'processing': 'bg-blue-100 text-blue-800',
@@ -59,6 +101,11 @@ function OrderCard({ order, isExpanded, onToggleExpand }) {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  // Adapted to handle both backend formats - orderNumber might be id or _id
+  const orderNum = order.orderNumber || order._id;
+  // Calculate total if not provided by backend
+  const total = order.totalAmount || order.total;
+  
   return (
     <div className="bg-[var(--md-sys-color-surface-container)] rounded-lg shadow-sm overflow-hidden">
       {/* Order Header */}
@@ -70,7 +117,7 @@ function OrderCard({ order, isExpanded, onToggleExpand }) {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-[var(--md-sys-color-on-surface)]">
-                Order #{order.orderNumber}
+                Order #{orderNum}
               </h3>
               <span className={`text-xs px-2 py-1 rounded-full ${getStatusClass(order.status)}`}>
                 {order.status}
@@ -83,17 +130,19 @@ function OrderCard({ order, isExpanded, onToggleExpand }) {
           
           <div className="sm:text-right">
             <p className="font-bold text-[var(--md-sys-color-on-surface)]">
-              {formatCurrency(order.total)}
+              {formatCurrency(total)}
             </p>
             <p className="text-sm text-[var(--md-sys-color-on-surface-variant)]">
-              {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
+              {order.items?.length} {order.items?.length === 1 ? 'item' : 'items'}
             </p>
           </div>
         </div>
         
         <div className="flex justify-between items-center mt-2">
           <span className="text-sm text-[var(--md-sys-color-on-surface-variant)]">
-            {order.paymentMethod}
+            {order.paymentDetails?.method === 'cash' ? 'Cash on Delivery' : 
+             order.paymentDetails?.method === 'card' ? 'Credit Card' :
+             order.paymentMethod || order.paymentDetails?.method || 'N/A'}
           </span>
           <span className="text-[var(--md-sys-color-primary)] flex items-center">
             {isExpanded ? 'Hide Details ' : 'View Details '}
@@ -128,7 +177,7 @@ function OrderCard({ order, isExpanded, onToggleExpand }) {
                 <p className="text-[var(--md-sys-color-on-surface)]">{order.shippingAddress.fullName}</p>
                 <p className="text-[var(--md-sys-color-on-surface)]">{order.shippingAddress.street}</p>
                 <p className="text-[var(--md-sys-color-on-surface)]">
-                  {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
+                  {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zip || order.shippingAddress.zipCode}
                 </p>
                 <p className="text-[var(--md-sys-color-on-surface)]">{order.shippingAddress.country}</p>
                 <p className="text-[var(--md-sys-color-on-surface)]">{order.shippingAddress.phone}</p>
@@ -143,20 +192,28 @@ function OrderCard({ order, isExpanded, onToggleExpand }) {
               <div className="bg-[var(--md-sys-color-surface)] p-3 rounded border border-[var(--md-sys-color-outline-variant)]">
                 <div className="flex justify-between py-1">
                   <span className="text-[var(--md-sys-color-on-surface)]">Subtotal</span>
-                  <span className="text-[var(--md-sys-color-on-surface)]">{formatCurrency(order.subtotal)}</span>
+                  <span className="text-[var(--md-sys-color-on-surface)]">
+                    {formatCurrency(order.subTotal || order.subtotal || 0)}
+                  </span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span className="text-[var(--md-sys-color-on-surface)]">Shipping</span>
-                  <span className="text-[var(--md-sys-color-on-surface)]">{formatCurrency(order.shipping)}</span>
+                  <span className="text-[var(--md-sys-color-on-surface)]">
+                    {formatCurrency(order.shippingFee || order.shipping || 0)}
+                  </span>
                 </div>
                 <div className="flex justify-between py-1">
                   <span className="text-[var(--md-sys-color-on-surface)]">Tax</span>
-                  <span className="text-[var(--md-sys-color-on-surface)]">{formatCurrency(order.tax)}</span>
+                  <span className="text-[var(--md-sys-color-on-surface)]">
+                    {formatCurrency(order.taxAmount || order.tax || 0)}
+                  </span>
                 </div>
                 <div className="border-t border-[var(--md-sys-color-outline-variant)] my-1"></div>
                 <div className="flex justify-between pt-1">
                   <span className="font-bold text-[var(--md-sys-color-on-surface)]">Total</span>
-                  <span className="font-bold text-[var(--md-sys-color-on-surface)]">{formatCurrency(order.total)}</span>
+                  <span className="font-bold text-[var(--md-sys-color-on-surface)]">
+                    {formatCurrency(order.totalAmount || order.total || 0)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -166,7 +223,7 @@ function OrderCard({ order, isExpanded, onToggleExpand }) {
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               className="px-4 py-2 bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] rounded-full"
-              onClick={() => window.open(`/orders/${order.id}/invoice`, '_blank')}
+              onClick={() => window.open(`/orders/${order._id}/invoice`, '_blank')}
             >
               Download Invoice
             </button>
@@ -174,7 +231,7 @@ function OrderCard({ order, isExpanded, onToggleExpand }) {
             {['pending', 'processing'].includes(order.status.toLowerCase()) && (
               <button
                 className="px-4 py-2 border border-[var(--md-sys-color-outline)] text-[var(--md-sys-color-on-surface)] rounded-full"
-                onClick={() => {/* Handle cancellation */}}
+                onClick={() => handleCancelOrder(order._id)}
               >
                 Cancel Order
               </button>
@@ -182,7 +239,7 @@ function OrderCard({ order, isExpanded, onToggleExpand }) {
             
             {order.status.toLowerCase() === 'delivered' && !order.isReviewed && (
               <Link
-                to={`/review/order/${order.id}`}
+                to={`/review/order/${order._id}`}
                 className="px-4 py-2 bg-[var(--md-sys-color-secondary)] text-[var(--md-sys-color-on-secondary)] rounded-full"
               >
                 Write a Review
@@ -195,7 +252,7 @@ function OrderCard({ order, isExpanded, onToggleExpand }) {
   );
 }
 
-// Empty state component
+// Empty state component - Keep unchanged
 function EmptyOrders() {
   return (
     <div className="text-center py-16">
@@ -216,10 +273,10 @@ function EmptyOrders() {
   );
 }
 
-// Main component
+// Main component - Update to match backend API
 export default function OrdersPage() {
   const navigate = useNavigate();
-  const { isLoggedIn } = useUserContext();
+  const { isLoggedIn, token } = useUserContext();
   const { toast } = useToast();
   
   const [expandedOrderId, setExpandedOrderId] = useState(null);
@@ -234,7 +291,7 @@ export default function OrdersPage() {
     }
   }, [isLoggedIn, navigate]);
   
-  // Fetch orders
+  // Fetch orders with React Query
   const {
     data: ordersData,
     isLoading,
@@ -243,11 +300,23 @@ export default function OrdersPage() {
   } = useQuery({
     queryKey: ['orders', currentPage],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/order?page=${currentPage}&limit=${limit}`);
-      setTotalPages(Math.ceil(response.data.total / limit));
+      const response = await axiosInstance.get(
+        `/order?page=${currentPage}&limit=${limit}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      // Update total pages from backend response
+      if (response.data.pagination) {
+        setTotalPages(response.data.pagination.pages || 1);
+      }
+      
       return response.data;
     },
-    enabled: isLoggedIn
+    enabled: isLoggedIn && !!token
   });
   
   // Handle errors
@@ -255,7 +324,7 @@ export default function OrdersPage() {
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to load orders. Please try again.",
+        description: error.response?.data?.message || "Failed to load orders. Please try again.",
         type: "error"
       });
     }
@@ -269,6 +338,35 @@ export default function OrdersPage() {
   // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };  
+  // Handle order cancellation
+  const handleCancelOrder = async (orderId) => {
+    try {
+      await axiosInstance.put(
+        `/order/${orderId}/cancel`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      toast({
+        title: "Order Cancelled",
+        description: "Your order has been cancelled successfully.",
+        type: "success"
+      });
+      
+      // Refresh order list
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to cancel order. Please try again.",
+        type: "error"
+      });
+    }
   };
 
   return (
@@ -283,10 +381,11 @@ export default function OrdersPage() {
         <div className="space-y-6">
           {ordersData.orders.map(order => (
             <OrderCard
-              key={order.id}
+              key={order._id}
               order={order}
-              isExpanded={expandedOrderId === order.id}
-              onToggleExpand={() => toggleOrderExpand(order.id)}
+              isExpanded={expandedOrderId === order._id}
+              onToggleExpand={() => toggleOrderExpand(order._id)}
+              handleCancelOrder={handleCancelOrder}
             />
           ))}
           
@@ -296,6 +395,7 @@ export default function OrdersPage() {
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={handlePageChange}
+                isDisabled={isLoading}
               />
             </div>
           )}

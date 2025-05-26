@@ -17,12 +17,14 @@ import CheckoutPage from './pages/CheckoutPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import OrdersPage from './pages/OrdersPage.jsx';
 import SettingsPage from './pages/SettingsPage.jsx';
+import RegisterPage from './pages/RegisterPage.jsx';
 
 export function AppRoutes() {
   return (
     <Routes>
       {/* Login route outside of layout */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       
       {/* Routes with shared layout */}
       <Route path="/" element={<Layout />}>
