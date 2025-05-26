@@ -123,31 +123,44 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (isLoggedIn && user) {
       setFormData(prevData => {
+        // Map user data to form fields with better fallbacks
         const newData = {
           ...prevData,
-          fullName: user.name || prevData.fullName,
+          fullName: user.name || user.fullName || prevData.fullName,
           email: user.email || prevData.email,
-          address: user.address?.street || prevData.address,
-          city: user.address?.city || prevData.city,
-          state: user.address?.state || prevData.state,
-          zipCode: user.address?.zipCode || prevData.zipCode,
-          country: user.address?.country || prevData.country,
-          phone: user.phone || prevData.phone
+          // Handle different address structures
+          address: user.address?.street || user.street || user.addressLine1 || prevData.address,
+          home: user.address?.home || user.home || user.apartment || prevData.home || '',
+          city: user.address?.city || user.city || prevData.city,
+          state: user.address?.state || user.state || user.province || prevData.state,
+          zipCode: user.address?.zipCode || user.address?.zip || user.zipCode || user.zip || prevData.zipCode,
+          country: user.address?.country || user.country || prevData.country,
+          phone: user.phone || user.phoneNumber || user.contactNumber || prevData.phone
         };
         
-        // Save the updated data with user information
-        setTimeout(() => {
-          localStorage.setItem('checkoutFormData', JSON.stringify({
-            formData: newData,
-            shippingMethod,
-            paymentMethod
-          }));
-        }, 0);
+        // Update form errors to clear any errors for fields that now have values
+        setFormErrors(prevErrors => {
+          const updatedErrors = { ...prevErrors };
+          Object.keys(newData).forEach(key => {
+            if (newData[key] && updatedErrors[key]) {
+              delete updatedErrors[key];
+            }
+          });
+          return updatedErrors;
+        });
         
+        // Save the updated data with user information
+        localStorage.setItem('checkoutFormData', JSON.stringify({
+          formData: newData,
+          shippingMethod,
+          paymentMethod
+        }));
+        
+        console.log('Form data auto-filled with user information');
         return newData;
       });
     }
-  }, [isLoggedIn, user, shippingMethod, paymentMethod]);
+  }, [isLoggedIn, user]); // Remove shippingMethod and paymentMethod from dependencies
 
   // Update localStorage whenever form data changes
   useEffect(() => {
