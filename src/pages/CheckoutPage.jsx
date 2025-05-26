@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import crypto from 'crypto';
 import { useNavigate } from 'react-router-dom';
 import { useCartContext } from '../hooks/useCartContext';
 import { useUserContext } from '../hooks/useUserContext';
@@ -150,11 +151,12 @@ export default function CheckoutPage() {
         });
         
         // Save the updated data with user information
-        localStorage.setItem('checkoutFormData', JSON.stringify({
+        const encryptedData = encryptData(JSON.stringify({
           formData: newData,
           shippingMethod,
           paymentMethod
         }));
+        localStorage.setItem('checkoutFormData', encryptedData);
         
         console.log('Form data auto-filled with user information');
         return newData;
@@ -532,4 +534,11 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
+// Utility function to encrypt data
+function encryptData(data) {
+  const algorithm = 'aes-256-ctr';
+  const secretKey = process.env.REACT_APP_ENCRYPTION_KEY; // Use a secure key from environment variables
+  const cipher = crypto.createCipher(algorithm, secretKey);
+  return cipher.update(data, 'utf8', 'hex') + cipher.final('hex');
+}
 }
